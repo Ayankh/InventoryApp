@@ -46,11 +46,14 @@ namespace InventoryManagementApp
                 Description = txtItemDescription.Text,
                 Price = decimal.Parse(txtItemPrice.Text)
             };
+            int v = 10;
 
             items.Add(newItem);
 
-            // Save the updated inventory
+            // Save the updated inventory chaged
             SaveInventoryToFile();
+
+
         }
 
         private void btnDeleteItem_Click(object sender, RoutedEventArgs e)
