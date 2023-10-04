@@ -19,7 +19,6 @@ namespace InventoryManagementApp
         {
             InitializeComponent();
             dgInventory.ItemsSource = items;
-            currentFilePath = "inventory.json"; // Default file path
             LoadInventoryFromFile(); // Load inventory data at startup
         }
 
@@ -38,6 +37,15 @@ namespace InventoryManagementApp
             if (!ValidateInput())
                 return;
 
+            int newItemID = int.Parse(txtItemID.Text);
+
+            // Check if the item with the same ID already exists
+            if (items.Any(item => item.ItemID == newItemID))
+            {
+                MessageBox.Show("Duplicate Item ID");
+                return;
+            }
+
             // Create a new item and add it to the ObservableCollection
             Item newItem = new Item
             {
@@ -46,12 +54,19 @@ namespace InventoryManagementApp
                 Description = txtItemDescription.Text,
                 Price = decimal.Parse(txtItemPrice.Text)
             };
-            int v = 10;
+
 
             items.Add(newItem);
 
             // Save the updated inventory chaged
             SaveInventoryToFile();
+
+            // Clear the text boxes
+            txtItemID.Text = "";
+            txtItemName.Text = "";
+            txtItemDescription.Text = "";
+            txtItemPrice.Text = "";
+            txtItemQuantity.Text = "";
 
 
         }
@@ -81,33 +96,38 @@ namespace InventoryManagementApp
                 MessageBox.Show("Please select an item to modify.");
                 return;
             }
-
+            //Item selectedItem = (Item)dgInventory.SelectedItem;
+            // MessageBox.Show(selectedItem.ItemID.ToString());
             // Validate input data
             if (!ValidateInput())
                 return;
 
             // Modify the selected item in the ObservableCollection
             Item selectedItem = (Item)dgInventory.SelectedItem;
-            selectedItem.ItemID = int.Parse(txtItemID.Text);
-            selectedItem.ItemName = txtItemName.Text;
-            selectedItem.Description = txtItemDescription.Text;
-            selectedItem.Price = decimal.Parse(txtItemPrice.Text);
+            //selectedItem.ItemID = int.Parse(txtItemID.Text);
+            //selectedItem.ItemName = txtItemName.Text;
+            //selectedItem.Description = txtItemDescription.Text;
+            //selectedItem.Price = decimal.Parse(txtItemPrice.Text);
 
             // Save the updated inventory
             SaveInventoryToFile();
+
+            MessageBox.Show("Changes have been saved.");
         }
+
 
         private bool ValidateInput()
         {
+            Item selectedItem = (Item)dgInventory.SelectedItem;
             // Data validation for Item ID
-            if (!int.TryParse(txtItemID.Text, out int itemID) || itemID <= 0)
+            if (selectedItem.ItemID <= 0)
             {
                 MessageBox.Show("Please enter a valid positive Item ID.");
                 return false;
             }
 
             // Data validation for Price
-            if (!decimal.TryParse(txtItemPrice.Text, out decimal price) || price <= 0)
+            if (selectedItem.Price <= 0)
             {
                 MessageBox.Show("Please enter a valid positive Price.");
                 return false;

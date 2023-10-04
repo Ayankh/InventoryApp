@@ -17,11 +17,11 @@
 
         <Style TargetType="Button">
             <Setter Property="Background" Value="#FF19A2B8"/>
-            <!-- Default background color -->
+           
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="Black"/>
-                    <!-- Hover color -->
+                    
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -63,14 +63,21 @@
             <TextBox x:Name="txtItemName" Width="270" Height="25"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="175,260,515,361" >
-            <TextBlock Width="100" VerticalAlignment="Center">Description:</TextBlock>
-            <TextBox x:Name="txtItemDescription" Width="270" Height="24"/>
-        </StackPanel>
+        
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="174,323,514,324" >
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="174,268,514,379" >
             <TextBlock Width="100" VerticalAlignment="Center">Price:</TextBlock>
             <TextBox x:Name="txtItemPrice" Width="270" Height="27"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="174,316,514,331" >
+            <TextBlock Width="100" VerticalAlignment="Center">Quantity:</TextBlock>
+            <TextBox x:Name="txtItemQuantity" Width="270" Height="27"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="176,355,514,266" >
+            <TextBlock Width="100" VerticalAlignment="Center">Description:</TextBlock>
+            <TextBox x:Name="txtItemDescription" Width="270" Height="24"/>
         </StackPanel>
 
         <!-- Add a Search TextBox and Search Button -->
@@ -98,6 +105,6 @@
                 <MenuItem Header="Save" Click="MenuSave_Click" Background="#FF19A2B8" BorderBrush="#FF08435C"/>
             </MenuItem>
         </Menu>
-        <Button Content="Add" VerticalAlignment="Top"  Width="100" Click="btnAddItem_Click" Margin="279,378,901,0" Grid.Row="3" />
+        <Button Content="Add" VerticalAlignment="Top"  Width="100" Click="btnAddItem_Click" Margin="279,443,901,0" Grid.Row="3" />
     </Grid>
 </Window>
