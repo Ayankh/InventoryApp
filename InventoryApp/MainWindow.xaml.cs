@@ -11,8 +11,9 @@ namespace InventoryManagementApp
 {
     public partial class MainWindow : Window
     {
+        private const string DefaultFilePath = "default_inventory.json";
         private ObservableCollection<Item> items = new ObservableCollection<Item>();
-        private string currentFilePath = null;
+        private string currentFilePath = DefaultFilePath;
         private bool isDataChanged = false;
 
         public MainWindow()
@@ -26,6 +27,7 @@ namespace InventoryManagementApp
         private class Item
         {
             public int ItemID { get; set; }
+            public int Quantity { get; set; }
             public string ItemName { get; set; }
             public string Description { get; set; }
             public decimal Price { get; set; }
@@ -33,43 +35,68 @@ namespace InventoryManagementApp
 
         private void btnAddItem_Click(object sender, RoutedEventArgs e)
         {
-            // Validate input data
-            if (!ValidateInput())
+            // Check if any field is empty
+            if (string.IsNullOrWhiteSpace(txtItemID.Text) ||
+                string.IsNullOrWhiteSpace(txtItemName.Text) ||
+                string.IsNullOrWhiteSpace(txtItemQuantity.Text) ||
+                string.IsNullOrWhiteSpace(txtItemDescription.Text) ||
+                string.IsNullOrWhiteSpace(txtItemPrice.Text))
+            {
+                MessageBox.Show("Please fill in all fields.");
                 return;
+            }
 
-            int newItemID = int.Parse(txtItemID.Text);
+            // Validate input data for Item ID
+            if (!int.TryParse(txtItemID.Text, out int newItemID) || newItemID <= 0)
+            {
+                MessageBox.Show("Please enter a valid positive Item ID.");
+                return;
+            }
 
-            // Check if the item with the same ID already exists
+            // Check if the Item ID is a duplicate
             if (items.Any(item => item.ItemID == newItemID))
             {
-                MessageBox.Show("Duplicate Item ID");
+                MessageBox.Show("Duplicate Item ID. Please enter a unique Item ID.");
+                return;
+            }
+
+            // Validate Quantity and Price
+            if (!int.TryParse(txtItemQuantity.Text, out int quantity) || quantity <= 0)
+            {
+                MessageBox.Show("Please enter a valid positive Quantity.");
+                return;
+            }
+
+            if (!decimal.TryParse(txtItemPrice.Text, out decimal price) || price <= 0)
+            {
+                MessageBox.Show("Please enter a valid positive Price.");
                 return;
             }
 
             // Create a new item and add it to the ObservableCollection
             Item newItem = new Item
             {
-                ItemID = int.Parse(txtItemID.Text),
+                ItemID = newItemID,
                 ItemName = txtItemName.Text,
+                Quantity = quantity,
                 Description = txtItemDescription.Text,
-                Price = decimal.Parse(txtItemPrice.Text)
+                Price = price
             };
-
 
             items.Add(newItem);
 
-            // Save the updated inventory chaged
+            // Save the updated inventory
             SaveInventoryToFile();
 
             // Clear the text boxes
-            txtItemID.Text = "";
-            txtItemName.Text = "";
-            txtItemDescription.Text = "";
-            txtItemPrice.Text = "";
-            txtItemQuantity.Text = "";
-
-
+            txtItemID.Clear();
+            txtItemName.Clear();
+            txtItemDescription.Clear();
+            txtItemPrice.Clear();
+            txtItemQuantity.Clear();
         }
+
+
 
         private void btnDeleteItem_Click(object sender, RoutedEventArgs e)
         {
@@ -96,18 +123,11 @@ namespace InventoryManagementApp
                 MessageBox.Show("Please select an item to modify.");
                 return;
             }
-            //Item selectedItem = (Item)dgInventory.SelectedItem;
-            // MessageBox.Show(selectedItem.ItemID.ToString());
-            // Validate input data
-            if (!ValidateInput())
-                return;
+
 
             // Modify the selected item in the ObservableCollection
             Item selectedItem = (Item)dgInventory.SelectedItem;
-            //selectedItem.ItemID = int.Parse(txtItemID.Text);
-            //selectedItem.ItemName = txtItemName.Text;
-            //selectedItem.Description = txtItemDescription.Text;
-            //selectedItem.Price = decimal.Parse(txtItemPrice.Text);
+
 
             // Save the updated inventory
             SaveInventoryToFile();
@@ -116,25 +136,7 @@ namespace InventoryManagementApp
         }
 
 
-        private bool ValidateInput()
-        {
-            Item selectedItem = (Item)dgInventory.SelectedItem;
-            // Data validation for Item ID
-            if (selectedItem.ItemID <= 0)
-            {
-                MessageBox.Show("Please enter a valid positive Item ID.");
-                return false;
-            }
 
-            // Data validation for Price
-            if (selectedItem.Price <= 0)
-            {
-                MessageBox.Show("Please enter a valid positive Price.");
-                return false;
-            }
-
-            return true;
-        }
 
         private void LoadInventoryFromFile()
         {
