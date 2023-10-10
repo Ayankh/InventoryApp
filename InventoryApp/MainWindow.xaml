@@ -92,7 +92,7 @@
             <Button Content="Delete" Width="100" VerticalAlignment="Center" Click="btnDeleteItem_Click"/>
         </StackPanel>
 
-        <DataGrid x:Name="dgInventory" Grid.Row="3" AutoGenerateColumns="True" Margin="828,110,92,211"/>
+        <DataGrid x:Name="dgInventory" Grid.Row="3" AutoGenerateColumns="True" Margin="828,110,92,211" CellEditEnding="dgInventory_CellEditEnding_1" />
 
 
         <!-- MenuStrip for File Handling -->
