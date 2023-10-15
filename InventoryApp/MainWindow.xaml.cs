@@ -15,7 +15,6 @@ namespace InventoryManagementApp
         private const string DefaultFilePath = "default_inventory.json";
         private ObservableCollection<Item> items = new ObservableCollection<Item>();
         private string currentFilePath = DefaultFilePath;
-        private bool isDataChanged = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -27,8 +26,8 @@ namespace InventoryManagementApp
         private class Item
         {
             public int ItemID { get; set; }
-            public int Quantity { get; set; }
             public string ItemName { get; set; }
+            public int Quantity { get; set; }
             public string Description { get; set; }
             public decimal Price { get; set; }
 
@@ -221,7 +220,6 @@ namespace InventoryManagementApp
 
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
-            // Implement search functionality
             string searchQuery = txtSearch.Text.ToLower();
 
             IEnumerable<Item> searchResults = items.Where(item =>
@@ -231,32 +229,16 @@ namespace InventoryManagementApp
 
             dgInventory.ItemsSource = new ObservableCollection<Item>(searchResults);
         }
-
-        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void btnSearchClear_Click(object sender, RoutedEventArgs e)
         {
-            if (isDataChanged)
-            {
-                var result = MessageBox.Show("Do you want to save changes before exiting?", "Save Changes",
-                    MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    SaveInventoryToFile();
-                }
-                else if (result == MessageBoxResult.Cancel)
-                {
-                    e.Cancel = true; // Cancel the form close
-                }
-                // Otherwise, allow the form to close
-            }
+            dgInventory.ItemsSource = this.items;
         }
-
+        
 
         private void dgInventory_CellEditEnding_1(object sender, DataGridCellEditEndingEventArgs e)
         {
             Item editedItem = e.Row.Item as Item;
 
-            // Get the edited column
             DataGridColumn editedColumn = e.Column;
 
             if (editedItem != null)
@@ -287,5 +269,6 @@ namespace InventoryManagementApp
                 }
             }
         }
+
     }
 }
