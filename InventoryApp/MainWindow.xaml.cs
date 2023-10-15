@@ -181,7 +181,11 @@ namespace InventoryManagementApp
             {
                 string json = JsonConvert.SerializeObject(items);
                 File.WriteAllText(currentFilePath, json);
-                isDataChanged = false;
+            }
+            catch (IOException ex)
+            {
+
+                MessageBox.Show($"Error: {ex.Message}");
             }
             catch (Exception ex)
             {
