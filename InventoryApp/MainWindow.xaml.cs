@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 
@@ -14,8 +15,6 @@ namespace InventoryManagementApp
         private const string DefaultFilePath = "default_inventory.json";
         private ObservableCollection<Item> items = new ObservableCollection<Item>();
         private string currentFilePath = DefaultFilePath;
-        private bool isDataChanged = false;
-
         public MainWindow()
         {
             InitializeComponent();
@@ -27,10 +26,51 @@ namespace InventoryManagementApp
         private class Item
         {
             public int ItemID { get; set; }
-            public int Quantity { get; set; }
             public string ItemName { get; set; }
+            public int Quantity { get; set; }
             public string Description { get; set; }
             public decimal Price { get; set; }
+
+        }
+
+
+        private bool IsValidItemID(string input)
+        {
+            // Validate input data for Item ID
+            if (!int.TryParse(input, out int newItemID) || newItemID <= 0)
+            {
+                MessageBox.Show("Please enter a valid positive Item ID.");
+                return false;
+            }
+
+            // Check if the Item ID is a duplicate
+            if (items.Any(item => item.ItemID == newItemID))
+            {
+                MessageBox.Show("Duplicate Item ID. Please enter a unique Item ID.");
+                return false;
+            }
+            return true;
+        }
+
+        private bool IsValidQuantity(string input)
+        {
+            // Validate Quantity and Price
+            if (!int.TryParse(input, out int quantity) || quantity <= 0)
+            {
+                MessageBox.Show("Please enter a valid positive Quantity.");
+                return false;
+            }
+            return true;
+        }
+
+        private bool IsValidPrice(string input)
+        {
+            if (!decimal.TryParse(input, out decimal price) || price <= 0)
+            {
+                MessageBox.Show("Please enter a valid positive Price.");
+                return false;
+            }
+            return true;
         }
 
         private void btnAddItem_Click(object sender, RoutedEventArgs e)
@@ -46,33 +86,13 @@ namespace InventoryManagementApp
                 return;
             }
 
-            // Validate input data for Item ID
-            if (!int.TryParse(txtItemID.Text, out int newItemID) || newItemID <= 0)
+            if (!IsValidItemID(txtItemID.Text) || !IsValidQuantity(txtItemQuantity.Text) || !IsValidPrice(txtItemPrice.Text)) 
             {
-                MessageBox.Show("Please enter a valid positive Item ID.");
                 return;
             }
-
-            // Check if the Item ID is a duplicate
-            if (items.Any(item => item.ItemID == newItemID))
-            {
-                MessageBox.Show("Duplicate Item ID. Please enter a unique Item ID.");
-                return;
-            }
-
-            // Validate Quantity and Price
-            if (!int.TryParse(txtItemQuantity.Text, out int quantity) || quantity <= 0)
-            {
-                MessageBox.Show("Please enter a valid positive Quantity.");
-                return;
-            }
-
-            if (!decimal.TryParse(txtItemPrice.Text, out decimal price) || price <= 0)
-            {
-                MessageBox.Show("Please enter a valid positive Price.");
-                return;
-            }
-
+            int newItemID = int.Parse(txtItemID.Text);
+            int quantity = int.Parse(txtItemQuantity.Text);
+            int price = int.Parse(txtItemPrice.Text);
             // Create a new item and add it to the ObservableCollection
             Item newItem = new Item
             {
@@ -140,7 +160,7 @@ namespace InventoryManagementApp
 
         private void LoadInventoryFromFile()
         {
-            if (File.Exists(currentFilePath))
+            if (File.Exists(this.currentFilePath))
             {
                 try
                 {
@@ -161,7 +181,11 @@ namespace InventoryManagementApp
             {
                 string json = JsonConvert.SerializeObject(items);
                 File.WriteAllText(currentFilePath, json);
-                isDataChanged = false;
+            }
+            catch (IOException ex)
+            {
+
+                MessageBox.Show($"Error: {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -185,21 +209,21 @@ namespace InventoryManagementApp
 
         private void MenuSave_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
+
+            var saveFileDialog = new SaveFileDialog
             {
                 Filter = "JSON Files (*.json)|*.json|All Files (*.*)|*.*"
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (saveFileDialog.ShowDialog() == true)
             {
-                currentFilePath = openFileDialog.FileName;
-                SaveInventoryToFile();
+                this.currentFilePath = saveFileDialog.FileName;
+                SaveInventoryToFile(); 
             }
         }
 
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
-            // Implement search functionality
             string searchQuery = txtSearch.Text.ToLower();
 
             IEnumerable<Item> searchResults = items.Where(item =>
@@ -209,24 +233,46 @@ namespace InventoryManagementApp
 
             dgInventory.ItemsSource = new ObservableCollection<Item>(searchResults);
         }
-
-        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void btnSearchClear_Click(object sender, RoutedEventArgs e)
         {
-            if (isDataChanged)
-            {
-                var result = MessageBox.Show("Do you want to save changes before exiting?", "Save Changes",
-                    MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+            dgInventory.ItemsSource = this.items;
+        }
+        
 
-                if (result == MessageBoxResult.Yes)
+        private void dgInventory_CellEditEnding_1(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            Item editedItem = e.Row.Item as Item;
+
+            DataGridColumn editedColumn = e.Column;
+
+            if (editedItem != null)
+            {
+                if (editedColumn.Header.ToString() == "ItemID")
                 {
-                    SaveInventoryToFile();
+                    TextBox textBox = e.EditingElement as TextBox;
+                    if (!IsValidItemID(textBox.Text))
+                    {
+                        return;
+                    }
                 }
-                else if (result == MessageBoxResult.Cancel)
+                else if (editedColumn.Header.ToString() == "Quantity")
                 {
-                    e.Cancel = true; // Cancel the form close
+                    TextBox textBox = e.EditingElement as TextBox;
+                    if (!IsValidQuantity(textBox.Text))
+                    {
+                        return;
+                    }
                 }
-                // Otherwise, allow the form to close
+                else if (editedColumn.Header.ToString() == "Price")
+                {
+                    TextBox textBox = e.EditingElement as TextBox;
+                    if (!IsValidPrice(textBox.Text))
+                    {
+                        return;
+                    }
+                }
             }
         }
+
     }
 }
